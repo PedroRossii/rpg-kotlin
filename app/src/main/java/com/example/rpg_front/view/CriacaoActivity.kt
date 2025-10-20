@@ -1,5 +1,6 @@
 package com.example.rpg_front.view
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,10 +9,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.rpg_front.model.atributos.Atributos
 
@@ -19,70 +23,109 @@ class CriacaoActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CriacaoScreen { nome, raca, classe, atributos ->
-                val intent = Intent(this, FichaActivity::class.java).apply {
-                    putExtra("nome", nome)
-                    putExtra("raca", raca)
-                    putExtra("classe", classe)
-                    putExtra("for", atributos.forca)
-                    putExtra("des", atributos.destreza)
-                    putExtra("con", atributos.constituicao)
-                    putExtra("int", atributos.inteligencia)
-                    putExtra("sab", atributos.sabedoria)
-                    putExtra("car", atributos.carisma)
+            val activity = (LocalContext.current as? Activity)
+            CriacaoScreen(
+                onNavigateBack = { activity?.finish() },
+                onConfirmar = { nome, raca, classe, atributos ->
+                    // INTENT FOI SIMPLIFICADO. AGORA A FICHA SEMPRE CARREGA PELO BANCO
+                    // A FICHA DE CRIAÇÃO NÃO VAI MAIS PARA A FICHA DE DETALHES,
+                    // ELA APENAS SALVA E VOLTA PARA A LISTA.
+                    // ESTA LÓGICA SERÁ IMPLEMENTADA NA FICHA DE SALVAMENTO DEPOIS.
+
+                    val intent = Intent(this, FichaActivity::class.java).apply {
+                        // Passamos os dados para a FichaActivity salvar
+                        putExtra("ACTION_TYPE", "SAVE_NEW")
+                        putExtra("nome", nome)
+                        putExtra("raca", raca)
+                        putExtra("classe", classe)
+                        putExtra("for", atributos.forca)
+                        putExtra("des", atributos.destreza)
+                        putExtra("con", atributos.constituicao)
+                        putExtra("int", atributos.inteligencia)
+                        putExtra("sab", atributos.sabedoria)
+                        putExtra("car", atributos.carisma)
+                    }
+                    startActivity(intent)
+                    finish()
                 }
-                startActivity(intent)
-            }
+            )
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CriacaoScreen(
+    onNavigateBack: () -> Unit,
     onConfirmar: (String, String, String, Atributos) -> Unit
 ) {
     var nome by remember { mutableStateOf("") }
     var raca by remember { mutableStateOf("Humano") }
     var classe by remember { mutableStateOf("Guerreiro") }
 
-    // Estados para controlar a rolagem de atributos
     val metodosRolagem = listOf("Clássico", "Aventureiro", "Heróico")
     var metodoSelecionado by remember { mutableStateOf(metodosRolagem.first()) }
     var valoresRolados by remember { mutableStateOf<List<Int>?>(null) }
     var atributosFinais by remember { mutableStateOf<Atributos?>(null) }
     var podeCriar by remember { mutableStateOf(false) }
 
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Criar Novo Personagem") },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            OutlinedTextField(
+                value = nome,
+                onValueChange = { nome = it },
+                label = { Text("Nome do Personagem") },
+                modifier = Modifier.fillMaxWidth()
+            )
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()) // Adicionado para a tela ser rolável
-    ) {
-        OutlinedTextField(
-            value = nome,
-            onValueChange = { nome = it },
-            label = { Text("Nome do Personagem") },
-            modifier = Modifier.fillMaxWidth()
-        )
+            Spacer(Modifier.height(16.dp))
+            Text("Raça:")
+            DropdownMenuDemo(listOf("Humano", "Elfo", "Anão", "Halfling")) { raca = it }
 
-        Spacer(Modifier.height(16.dp))
-        Text("Raça:")
-        DropdownMenuDemo(listOf("Humano", "Elfo", "Anão", "Halfling")) { raca = it }
+            Spacer(Modifier.height(16.dp))
+            Text("Classe:")
+            DropdownMenuDemo(listOf("Guerreiro", "Clérigo", "Mago", "Paladino", "Bárbaro", "Druida", "Acadêmico", "Ilusionista", "Necromante")) { classe = it }
 
-        Spacer(Modifier.height(16.dp))
-        Text("Classe:")
-        DropdownMenuDemo(listOf("Guerreiro", "Clérigo", "Mago", "Paladino", "Bárbaro", "Druida", "Acadêmico", "Ilusionista", "Necromante")) { classe = it }
+            Spacer(Modifier.height(24.dp))
 
-        Spacer(Modifier.height(24.dp))
-
-        // --- SEÇÃO DE ROLAGEM DE ATRIBUTOS ---
-        Text("Método de Rolagem de Atributos:", style = MaterialTheme.typography.titleMedium)
-        Row(Modifier.fillMaxWidth()) {
-            metodosRolagem.forEach { metodo ->
-                Row(
-                    Modifier
-                        .selectable(
+            Text("Método de Rolagem de Atributos:", style = MaterialTheme.typography.titleMedium)
+            Row(Modifier.fillMaxWidth()) {
+                metodosRolagem.forEach { metodo ->
+                    Row(
+                        Modifier
+                            .selectable(
+                                selected = (metodo == metodoSelecionado),
+                                onClick = {
+                                    metodoSelecionado = metodo
+                                    valoresRolados = null
+                                    atributosFinais = null
+                                    podeCriar = false
+                                }
+                            )
+                            .padding(horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
                             selected = (metodo == metodoSelecionado),
                             onClick = {
                                 metodoSelecionado = metodo
@@ -91,73 +134,63 @@ fun CriacaoScreen(
                                 podeCriar = false
                             }
                         )
-                        .padding(horizontal = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = (metodo == metodoSelecionado),
-                        onClick = {
-                            metodoSelecionado = metodo
-                            valoresRolados = null
-                            atributosFinais = null
-                            podeCriar = false
-                        }
-                    )
-                    Text(text = metodo)
+                        Text(text = metodo)
+                    }
                 }
             }
-        }
 
-        Button(onClick = {
-            when (metodoSelecionado) {
-                "Clássico" -> {
-                    atributosFinais = Atributos.gerarClassico()
-                    valoresRolados = null
-                    podeCriar = true
+            Button(onClick = {
+                when (metodoSelecionado) {
+                    "Clássico" -> {
+                        atributosFinais = Atributos.gerarClassico()
+                        valoresRolados = null
+                        podeCriar = true
+                    }
+                    "Aventureiro" -> {
+                        valoresRolados = Atributos.gerarValoresAventureiro()
+                        atributosFinais = null
+                        podeCriar = false
+                    }
+                    "Heróico" -> {
+                        valoresRolados = Atributos.gerarValoresHeroico()
+                        atributosFinais = null
+                        podeCriar = false
+                    }
                 }
-                "Aventureiro" -> {
-                    valoresRolados = Atributos.gerarValoresAventureiro()
-                    atributosFinais = null
-                    podeCriar = false
-                }
-                "Heróico" -> {
-                    valoresRolados = Atributos.gerarValoresHeroico()
-                    atributosFinais = null
-                    podeCriar = false
-                }
+            }) {
+                Text("Rolar Atributos")
             }
-        }) {
-            Text("Rolar Atributos")
-        }
 
-        Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(16.dp))
 
-        if (metodoSelecionado == "Clássico" && atributosFinais != null) {
-            Text("Atributos Rolados (Clássico):")
-            Text("FOR:${atributosFinais!!.forca}, DES:${atributosFinais!!.destreza}, CON:${atributosFinais!!.constituicao}, " +
-                    "INT:${atributosFinais!!.inteligencia}, SAB:${atributosFinais!!.sabedoria}, CAR:${atributosFinais!!.carisma}")
-        }
+            if (metodoSelecionado == "Clássico" && atributosFinais != null) {
+                Text("Atributos Rolados (Clássico):")
+                Text("FOR:${atributosFinais!!.forca}, DES:${atributosFinais!!.destreza}, CON:${atributosFinais!!.constituicao}, INT:${atributosFinais!!.inteligencia}, SAB:${atributosFinais!!.sabedoria}, CAR:${atributosFinais!!.carisma}")
+            }
 
-        if (valoresRolados != null && metodoSelecionado != "Clássico") {
-            AtributosAssignmentScreen(
-                rolledValues = valoresRolados!!,
-                onAttributesAssigned = {
-                    atributosFinais = it
-                    podeCriar = true
-                }
-            )
-        }
+            if (valoresRolados != null && metodoSelecionado != "Clássico") {
+                AtributosAssignmentScreen(
+                    rolledValues = valoresRolados!!,
+                    onAttributesAssigned = {
+                        atributosFinais = it
+                        podeCriar = true
+                    }
+                )
+            }
 
-        Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(32.dp))
 
-        Button(
-            onClick = { onConfirmar(nome, raca, classe, atributosFinais!!) },
-            enabled = podeCriar && nome.isNotBlank()
-        ) {
-            Text("Criar Personagem")
+            Button(
+                onClick = { onConfirmar(nome, raca, classe, atributosFinais!!) },
+                enabled = podeCriar && nome.isNotBlank()
+            ) {
+                Text("Salvar Personagem")
+            }
         }
     }
 }
+
+// --- FUNÇÕES AUXILIARES QUE ESTAVAM FALTANDO ---
 
 @Composable
 fun AtributosAssignmentScreen(
