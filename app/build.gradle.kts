@@ -7,13 +7,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.meuprojeto"
-    compileSdk = 34
+    namespace = "com.example.rpg_front"
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.meuprojeto"
-        minSdk = 21
-        targetSdk = 34
+        minSdk = 23
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -62,9 +62,9 @@ android {
 dependencies {
 
     // Dependências Core do Android
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.0")
-    implementation("androidx.activity:activity-compose:1.9.0")
+    implementation(libs.androidx.core.ktx.v1131)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
 
     // --- Compose Bill of Materials (BOM) ---
     // A BOM garante que todas as suas bibliotecas do Compose são compatíveis entre si.
@@ -74,23 +74,23 @@ dependencies {
     androidTestImplementation(composeBom)
 
     // Dependências do Compose (sem especificar a versão, a BOM cuida disso)
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.ui:ui-tooling-preview")
-    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
 
     // Testes de UI com Compose
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.test.manifest)
 
     // --- Room (Banco de Dados) ---
     val roomVersion = "2.6.1"
-    implementation("androidx.room:room-runtime:$roomVersion")
-    ksp("androidx.room:room-compiler:$roomVersion")
-    implementation("androidx.room:room-ktx:$roomVersion") // Suporte a Coroutines
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx) // Suporte a Coroutines
 
     // --- ViewModel (Arquitetura) ---
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 }

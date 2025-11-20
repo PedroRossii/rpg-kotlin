@@ -190,8 +190,6 @@ fun CriacaoScreen(
     }
 }
 
-// --- FUNÇÕES AUXILIARES QUE ESTAVAM FALTANDO ---
-
 @Composable
 fun AtributosAssignmentScreen(
     rolledValues: List<Int>,

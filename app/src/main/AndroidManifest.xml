@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,7 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Meuprojeto">
 
-        <!-- Activity principal / launcher -->
         <activity
             android:name="com.example.rpg_front.view.MainActivity"
             android:exported="true">
@@ -19,7 +22,6 @@
             </intent-filter>
         </activity>
 
-        <!-- Outras activities do app -->
         <activity
             android:name="com.example.rpg_front.view.CriacaoActivity"
             android:exported="false" />
@@ -27,6 +29,15 @@
         <activity
             android:name="com.example.rpg_front.view.FichaActivity"
             android:exported="false" />
+
+        <activity
+            android:name="com.example.rpg_front.view.BatalhaActivity"
+            android:exported="false" />
+
+        <service
+            android:name="com.example.rpg_front.service.BatalhaService"
+            android:exported="false"
+            android:foregroundServiceType="shortService" />
 
     </application>
 
